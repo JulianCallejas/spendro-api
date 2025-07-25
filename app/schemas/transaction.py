@@ -57,6 +57,13 @@ class TransactionListResponse(BaseModel):
     offset: int
     items: List[TransactionResponse]
 
+class BudgetCategoriesResponse(BaseModel):
+    """Response model for budget categories grouped by transaction type"""
+    categories: Dict[str, Dict[str, List[str]]] = Field(
+        ..., 
+        description="Categories with subcategories grouped by transaction type (e.g., {'expense': {'food':['food', 'lunch']}, 'income': {'salary':['salary']}})"
+    )
+
 class RecurringTransactionBase(BaseModel):
     schedule: str = Field(..., pattern=r'^(daily|weekly|monthly|yearly)$')
     amount: float = Field(..., gt=0)

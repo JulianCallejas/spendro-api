@@ -48,6 +48,70 @@ def test_list_transactions(client, test_user, test_budget, auth_headers, db_sess
     assert response.status_code == 200
     data = response.json()
     assert "total" in data
+
+def test_get_budget_categories(client, test_user, test_budget, auth_headers, db_session):
+    """Test getting categories grouped by transaction type for a budget."""
+    from app.models.models import Transaction, TransactionType
+    
+    # Create test transactions with different types and categories
+    transactions = [
+        Transaction(
+            budget_id=test_budget.id,
+            user_id=test_user.id,
+            amount=100.00,
+            type=TransactionType.EXPENSE,
+            category="Food",
+            date=date.today()
+        ),
+        Transaction(
+            budget_id=test_budget.id,
+            user_id=test_user.id,
+            amount=50.00,
+            type=TransactionType.EXPENSE,
+            category="Transport",
+            date=date.today()
+        ),
+        Transaction(
+            budget_id=test_budget.id,
+            user_id=test_user.id,
+            amount=2000.00,
+            type=TransactionType.INCOME,
+            category="Salary",
+            date=date.today()
+        ),
+        Transaction(
+            budget_id=test_budget.id,
+            user_id=test_user.id,
+            amount=500.00,
+            type=TransactionType.INVESTMENT,
+            category="Stocks",
+            date=date.today()
+        )
+    ]
+    
+    for transaction in transactions:
+        db_session.add(transaction)
+    db_session.commit()
+    
+    response = client.get(
+        f"/api/v1/transactions/budget/{test_budget.id}/categories",
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert "categories" in data
+    
+    categories = data["categories"]
+    assert "expense" in categories
+    assert "income" in categories
+    assert "investment" in categories
+    
+    # Check that categories are properly grouped
+    assert "Food" in categories["expense"]
+    assert "Transport" in categories["expense"]
+    assert "Salary" in categories["income"]
+    assert "Stocks" in categories["investment"]
     assert "items" in data
     assert len(data["items"]) >= 1
 

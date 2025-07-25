@@ -5,6 +5,8 @@ import os
 import logging
 from typing import List
 
+from app.core.dependencies import get_current_user
+from app.models.models import User
 from app.schemas.transcription import TranscriptionResponse, TranscriptionError
 from app.services.transcription_service import transcription_service
 
@@ -25,7 +27,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 @router.post("/transcribe", response_model=TranscriptionResponse)
 async def transcribe_audio(
-    request: Request,
+    current_user: User = Depends(get_current_user),
     audio_file: UploadFile = File(..., description="Audio file to transcribe (max 1 minute, 10MB)")
 ):
     """
@@ -85,7 +87,7 @@ async def transcribe_audio(
                     language="es"     # Spanish
                 )
                 
-                logging.info(f"Successfully transcribed audio for user {request.state.user_id}")
+                logging.info(f"Successfully transcribed audio for user {current_user.id}")
                 
                 return TranscriptionResponse(
                     text=result["text"],

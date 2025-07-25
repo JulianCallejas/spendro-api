@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, distinct
 from sqlalchemy.sql import exists
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Dict
 from datetime import datetime, date
 
 from app.models.models import Transaction, RecurringTransaction, UserBudget, UserRole
@@ -248,3 +248,46 @@ class TransactionService:
         self.db.commit()
         
         return True
+    
+    async def get_budget_categories_by_type(self, budget_id: str, user_id: str) -> Dict[str, List[str]]:
+        """Get categories grouped by transaction type for a specific budget"""
+        # Check if user has access to the budget
+        user_has_access = self.db.query(UserBudget)\
+            .filter(UserBudget.budget_id == budget_id)\
+            .filter(UserBudget.user_id == user_id)\
+            .first()
+        
+        if not user_has_access:
+            return {}
+                        
+        results = self.db.query(
+            Transaction.type,
+            Transaction.category,
+            Transaction.subcategory
+        ).distinct(
+            Transaction.category,
+            Transaction.subcategory
+        ).filter(
+            Transaction.budget_id == budget_id
+        ).order_by(
+            Transaction.category,
+            Transaction.subcategory
+        ).all()
+        
+        
+        categories_dict = dict()
+        for transaction_type, category, subcategory in results:
+            if category is None and subcategory is None:
+                continue
+
+            if transaction_type not in categories_dict:
+                categories_dict[transaction_type] = {}
+            
+            normalized_category = subcategory if category is None else category
+            if normalized_category not in categories_dict[transaction_type]:
+                categories_dict[transaction_type][normalized_category] = []
+            
+            value_to_add = subcategory if subcategory is not None else normalized_category
+            categories_dict[transaction_type][normalized_category].append(value_to_add)
+        
+        return categories_dict

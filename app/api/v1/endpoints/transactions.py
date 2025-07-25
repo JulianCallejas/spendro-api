@@ -13,7 +13,7 @@ from app.schemas.transaction import (
     TransactionCreate, TransactionUpdate, TransactionResponse,
     TransactionListResponse, RecurringTransactionCreate,
     RecurringTransactionUpdate, RecurringTransactionResponse,
-    transaction_to_dict
+    BudgetCategoriesResponse, transaction_to_dict
 )
 from app.services.transaction_service import TransactionService
 from app.services.budget_service import BudgetService
@@ -297,6 +297,39 @@ async def delete_recurring_transaction(
         )
         
         
+
+@router.get("/categories/{budget_id}", response_model=BudgetCategoriesResponse)
+async def get_budget_categories(
+    budget_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get categories grouped by transaction type for a specific budget
+    
+    - **budget_id**: Budget's unique identifier
+    
+    Returns categories grouped by transaction type (e.g., {'expense': ['food', 'rent'], 'income': ['salary']})
+    """
+    try:
+        transaction_service = TransactionService(db)
+        categories = await transaction_service.get_budget_categories_by_type(
+            budget_id,
+            current_user.id
+        )
+        
+        return BudgetCategoriesResponse(categories=categories)
+        
+    except Exception as e:
+        logging.error(f"Failed to retrieve budget categories: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve budget categories"
+        )
+        
+      
+
+
         
 @router.get("/{transaction_id}", response_model=TransactionResponse)
 async def get_transaction(
@@ -415,3 +448,4 @@ async def delete_transaction(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to delete transaction"
         )
+
