@@ -147,6 +147,7 @@ class TransactionService:
             budget_id=recurring_data.budget_id,
             user_id=user_id,
             schedule=recurring_data.schedule,
+            recurring_type=recurring_data.recurring_type,
             amount=recurring_data.amount,
             currency=recurring_data.currency,
             type=recurring_data.type,

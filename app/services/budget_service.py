@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from typing import Optional, Tuple, List, Dict, Any
 from datetime import datetime
+import uuid
 
 from app.models.models import Budget, UserBudget, User, BudgetStatus, UserRole
 from app.schemas.budget import BudgetCreate, BudgetUpdate
@@ -73,6 +74,9 @@ class BudgetService:
     async def update_budget(self, budget_id: str, budget_update: BudgetUpdate, user_id: str) -> Optional[Budget]:
         """Update budget information"""
         
+        if not self.isValidUUID(budget_id):
+            return None
+        
         user_can_edit_filter = or_(
             UserBudget.role == UserRole.ADMIN,
             UserBudget.role == UserRole.EDITOR,
@@ -135,6 +139,10 @@ class BudgetService:
     
     async def user_has_budget_access(self, user_id: str, budget_id: str) -> bool:
         """Check if user has access to budget"""
+        
+        if not self.isValidUUID(budget_id):
+            return False
+        
         user_can_edit_filter = or_(
             UserBudget.role == UserRole.ADMIN,
             UserBudget.role == UserRole.EDITOR,
@@ -320,3 +328,9 @@ class BudgetService:
         return budget
     
     
+    def isValidUUID(self, uuid_string: str) -> bool:
+        try:
+            uuid_object = uuid.UUID(uuid_string)
+            return True
+        except ValueError:
+            return False

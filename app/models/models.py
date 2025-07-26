@@ -34,6 +34,10 @@ class SyncStatus(str, enum.Enum):
     PENDING = "pending"
     CONFLICT = "conflict"
 
+class RecurringType(str, enum.Enum):
+    AUTOMATIC = "automatic"
+    REMINDER = "reminder"
+
 class User(Base):
     __tablename__ = "users"
     
@@ -116,6 +120,7 @@ class RecurringTransaction(Base):
     budget_id = Column(UUID(as_uuid=True), ForeignKey("budgets.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     schedule = Column(String(50), nullable=False)  # daily, weekly, monthly, yearly
+    recurring_type = Column(SQLEnum(RecurringType), nullable=False)
     amount = Column(Float, nullable=False)
     currency = Column(String(3), nullable=False, default="USD")
     type = Column(SQLEnum(TransactionType), nullable=False)

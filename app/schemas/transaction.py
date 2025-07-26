@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List, Dict, Any, Union
 from datetime import datetime, date
-from app.models.models import TransactionType, SyncStatus
+from app.models.models import TransactionType, SyncStatus, RecurringType
 import uuid
 
 class TransactionBase(BaseModel):
@@ -66,6 +66,7 @@ class BudgetCategoriesResponse(BaseModel):
 
 class RecurringTransactionBase(BaseModel):
     schedule: str = Field(..., pattern=r'^(daily|weekly|monthly|yearly)$')
+    recurring_type: RecurringType
     amount: float = Field(..., gt=0)
     currency: str = Field("USD", pattern=r'^[A-Z]{3}$')
     type: TransactionType
@@ -79,6 +80,7 @@ class RecurringTransactionCreate(RecurringTransactionBase):
 
 class RecurringTransactionUpdate(BaseModel):
     schedule: Optional[str] = Field(None, pattern=r'^(daily|weekly|monthly|yearly)$')
+    recurring_type: Optional[RecurringType] = None
     amount: Optional[float] = Field(None, gt=0)
     currency: Optional[str] = Field(None, pattern=r'^[A-Z]{3}$')
     type: Optional[TransactionType] = None

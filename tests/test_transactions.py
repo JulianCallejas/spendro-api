@@ -240,6 +240,7 @@ def test_create_recurring_transaction(client, test_user, test_budget, auth_heade
         json={
             "budget_id": str(test_budget.id),
             "schedule": "monthly",
+            "recurring_type": "automatic",
             "amount": 2500.00,
             "currency": "USD",
             "type": "income",
@@ -257,12 +258,13 @@ def test_create_recurring_transaction(client, test_user, test_budget, auth_heade
 
 def test_list_recurring_transactions(client, test_user, test_budget, auth_headers, db_session):
     """Test listing recurring transactions."""
-    from app.models.models import RecurringTransaction, TransactionType
+    from app.models.models import RecurringTransaction, TransactionType, RecurringType
     
     recurring = RecurringTransaction(
         budget_id=test_budget.id,
         user_id=test_user.id,
         schedule="weekly",
+        recurring_type=RecurringType.AUTOMATIC,
         amount=100.00,
         type=TransactionType.EXPENSE,
         category="Groceries",

@@ -138,6 +138,7 @@ async def create_recurring_transaction(
     
     - **budget_id**: Budget where recurring transaction belongs
     - **schedule**: Recurrence schedule (daily, weekly, monthly, yearly)
+    - **recurring_type**: Type of recurring transaction (automatic, reminder)
     - **amount**: Transaction amount
     - **currency**: Transaction currency
     - **type**: Transaction type (income, expense, investment) 
@@ -173,6 +174,7 @@ async def create_recurring_transaction(
     except HTTPException:
         raise
     except Exception as e:
+        logging.error(f"Failed to create recurring transaction: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create recurring transaction"
@@ -224,6 +226,7 @@ async def update_recurring_transaction(
     
     - **recurring_id**: Recurring transaction's unique identifier
     - **schedule**: Recurrence schedule (optional)
+    - **recurring_type**: Type of recurring transaction (automatic, reminder) (optional)
     - **amount**: Transaction amount (optional)
     - **currency**: Transaction currency (optional)
     - **type**: Transaction type (optional)

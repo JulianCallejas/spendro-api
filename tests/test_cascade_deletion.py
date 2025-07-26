@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 from app.models.models import (
     User, Budget, UserBudget, Transaction, RecurringTransaction, 
-    TransactionCategory, TransactionSubcategory, UserRole, TransactionType
+    TransactionCategory, TransactionSubcategory, UserRole, TransactionType, RecurringType
 )
 import uuid
 from datetime import datetime, date
@@ -77,6 +77,7 @@ def test_user_cascade_deletion():
             budget_id=test_budget.id,
             user_id=test_user.id,
             schedule="monthly",
+            recurring_type=RecurringType.AUTOMATIC,
             amount=50.0,
             type=TransactionType.EXPENSE,
             category="Utilities",
@@ -206,6 +207,7 @@ def test_budget_cascade_deletion():
             budget_id=test_budget.id,
             user_id=test_user.id,
             schedule="weekly",
+            recurring_type=RecurringType.REMINDER,
             amount=25.0,
             type=TransactionType.EXPENSE,
             category="Coffee",
